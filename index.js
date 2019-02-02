@@ -26,9 +26,21 @@ function createStore () {
 		}
 	}
 	
-	// We are returning an object which will have a way to get the state, listen to the changes in state
+	/* 
+		Responsible for updating the state inside of our actual store
+		It receives the action which is the specific event that occured within the app
+	*/
+	const dispatch = (action) => {
+		state = todos(state, action);
+		
+		// Loop through all of our listeners (an array of functions) and invoke each one of them
+		listeners.forEach((listener) => listener());
+	}
+	
+	// We are returning an object which will have a way to get the state, listen to the changes in state and update the state
 	return {
 		getState,
-		subscribe
+		subscribe,
+		dispatch
 	}
 }
