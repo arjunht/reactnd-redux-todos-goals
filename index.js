@@ -42,11 +42,25 @@ function createStore (reducer) {
 
 // App code
 function todos (state = [], action) {
-	if(action.type === 'ADD_TODO') {
-		return state.concat([action.todo]);
-	}
-	
-	return state;
+	switch (acion.type) {
+		case 'ADD_TODO' :
+			return state.concat([action.todo]);
+		case 'REMOVE_TODO' :
+			return state.filter((todo) => todo.id !== action.id);
+		case 'TOGGLE_TODO' :
+			/* 
+				If the todos reducer function needs to be a pure function, we cannot directly modify the complete property of the todo object in the state
+				Wrong: return state.map((todo) => todo.id === action.id ? todo.complete = !todo.complete : todo)
+			*/
+			return state.map((todo) => todo.id !== action.id ? todo :
+				Object.assign({}, todo, { complete : !todo.complete }))
+			/*
+				Object.assign allows us to create a new object and merge different properties onto that object 
+				So we create a new object {}, then merge all of the properties of the todo object, except for complete which is going to be exact opposite of what complete currently is
+			*/
+		default :
+			return state;
+	}	
 }
 
 /*
