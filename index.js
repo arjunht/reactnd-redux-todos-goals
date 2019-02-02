@@ -15,7 +15,8 @@ function createStore (reducer) {
 		listeners.push(listener);
 		
 		return () => {
-			listeners.filter(l => l !== listener)
+			listeners = listeners.filter(l => l !== listener)
+			// Filter always returns a new array, so it needs to be set back to listeners after filtering out the unsubscribed listener
 		}
 	}
 	
@@ -53,3 +54,24 @@ function todos (state = [], action) {
 	Therefore we need to pass in the reducer function
 	const store = createStore(todos);
 */
+
+const store = createStore(todos);
+
+const unsubscribe = store.subscribe(() => {
+	console.log('The new state is', store.getState());
+});
+
+unsubscribe(); // This doesn't seem to be working becuase of a listeners bug above, fixed
+
+store.subscribe(() => {
+	console.log('The new state after unsubscribe is ', store.getState());
+});
+
+store.dispatch({
+	type: 'ADD_TODO',
+	todo: {
+		id: 0,
+		name: 'Learn Redux',
+		complete: false
+	}
+});
