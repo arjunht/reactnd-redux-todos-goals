@@ -169,9 +169,29 @@
 			const store = createStore(app);
 			
 			store.subscribe(() => {
-					console.log('The new state is', store.getState());
-				});
+				/*
+					Is there an other way of doing this by adding only the most recently added todo item
+					No, because the subscribe function doesn't have access to that
+				*/
 				
+				const { todos, goals } = store.getState();
+				
+				/*
+					If i add todo item and click Add Todo - todo list item gets updated
+					Then i add goal and click Add goal - goal list gets updated but a duplicate todo list item gets updated too
+					
+					Reason: DOM list isnt cleared, so we are adding the same todo to a todo already present
+					
+					Solution: Reset both the unordered list everytime the subsribe function is invoked
+				*/
+				
+				document.getElementById('todos').innerHTML = ''
+				document.getElementById('goals').innerHTML = ''
+				
+				todos.forEach(todo => addTodoToDOM(todo));
+				goals.forEach(goal => addGoalToDOM(goal));
+			});
+			
 			/*
 				const unsubscribe = store.subscribe(() => {
 					console.log('The new state is', store.getState());
@@ -220,6 +240,7 @@
 				store.dispatch(removeGoalAction(0));
 			*/
 			
+			// DOM code
 			function addTodo () {
 				const input = document.getElementById('todo');
 				const name = input.value;
@@ -249,6 +270,34 @@
 			document.getElementById('goalBtn')
 				.addEventListener('click', addGoal);
 			
+			function addTodoToDOM (todo) {
+				const node = document.createElement('li');
+				const text = document.createTextNode(todo.name);
+				if(todo.complete) {
+					text.setAttribute('style','text-decoration:line-through;');
+				}
+				node.appendChild(text);
+				node.setAttribute('id',todo.id);
+				
+				document.getElementById('todos')
+					.appendChild(node);
+			}
+			
+			function addGoalToDOM (goal) {
+				const node = document.createElement('li');
+				const text = document.createTextNode(goal.name);
+				node.appendChild(text);
+				
+				document.getElementById('goals')
+					.appendChild(node);
+			}
+			
+			function toggleTodo (id) {
+				store.dispatch(toggleTodoAction(id));
+			}
+			
+			document.getElementsByTagName('li')
+				.addEventListener('click', toggleTodo(event.target.id));
 		</script>
 	</body>
 </html>
