@@ -63,12 +63,25 @@ function todos (state = [], action) {
 	}	
 }
 
+function goals (state = [], action) {
+	switch (acion.type) {
+		case 'ADD_GOAL' :
+			return state.concat([action.goal]);
+		case 'REMOVE_GOAL' :
+			return state.filter((goal) => goal.id !== action.id);
+		default :
+			return state;
+	}	
+}
+
+
 /*
 	It doesnn't make sense fr a library have access to todos function because it could be different for different apps and todos might not be in the same scope
 	Therefore we need to pass in the reducer function
 	const store = createStore(todos);
 */
 
+// Even though we have two reducer functions - todos and goals - but when we invoke createStore, we need to pass it only a single reducer
 const store = createStore(todos);
 
 const unsubscribe = store.subscribe(() => {
