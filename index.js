@@ -42,7 +42,7 @@ function createStore (reducer) {
 
 // App code
 function todos (state = [], action) {
-	switch (acion.type) {
+	switch (action.type) {
 		case 'ADD_TODO' :
 			return state.concat([action.todo]);
 		case 'REMOVE_TODO' :
@@ -64,7 +64,7 @@ function todos (state = [], action) {
 }
 
 function goals (state = [], action) {
-	switch (acion.type) {
+	switch (action.type) {
 		case 'ADD_GOAL' :
 			return state.concat([action.goal]);
 		case 'REMOVE_GOAL' :
@@ -74,15 +74,29 @@ function goals (state = [], action) {
 	}	
 }
 
+// Root reducer
+function app (state = {}, action) {
+	/*
+		We are invoking todos here to get the todos portion of our state
+		state.todos - todos portion of our state
+	*/
+	return {
+		todos: todos(state.todos, action),
+		goals: goals(state.goals, action)
+	}
+	/*
+		Whenever we want to add new state to our store, add a new property to this object and the value of that property is going to be a reducer function, which is going to be responsbile for managing that slice of our state.
+	*/
+}
 
 /*
-	It doesnn't make sense fr a library have access to todos function because it could be different for different apps and todos might not be in the same scope
+	It doesn't make sense for a library have access to todos function because it could be different for different apps and todos might not be in the same scope
 	Therefore we need to pass in the reducer function
 	const store = createStore(todos);
 */
 
-// Even though we have two reducer functions - todos and goals - but when we invoke createStore, we need to pass it only a single reducer
-const store = createStore(todos);
+// Even though we have two reducer functions - todos and goals - but when we invoke createStore, we need to pass it only a single reducer - thats why we need to use a root reducer - app
+const store = createStore(app);
 
 const unsubscribe = store.subscribe(() => {
 	console.log('The new state is', store.getState());
@@ -102,3 +116,61 @@ store.dispatch({
 		complete: false
 	}
 });
+
+store.dispatch({
+  type: 'ADD_TODO',
+  todo: {
+    id: 0,
+    name: 'Walk the dog',
+    complete: false,
+  }
+})
+
+store.dispatch({
+  type: 'ADD_TODO',
+  todo: {
+    id: 1,
+    name: 'Wash the car',
+    complete: false,
+  }
+})
+
+store.dispatch({
+  type: 'ADD_TODO',
+  todo: {
+    id: 2,
+    name: 'Go to the gym',
+    complete: true,
+  }
+})
+
+store.dispatch({
+  type: 'REMOVE_TODO',
+  id: 1
+})
+
+store.dispatch({
+  type: 'TOGGLE_TODO',
+  id: 0
+})
+
+store.dispatch({
+  type: 'ADD_GOAL',
+  goal: {
+    id: 0,
+    name: 'Learn Redux'
+  }
+})
+
+store.dispatch({
+  type: 'ADD_GOAL',
+  goal: {
+    id: 1,
+    name: 'Lose 20 pounds'
+  }
+})
+
+store.dispatch({
+  type: 'REMOVE_GOAL',
+  id: 0
+})
