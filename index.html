@@ -264,6 +264,18 @@
 				}))
 			}
 			
+			/*
+				If i use the below in addEventListener in addTodoToDOM function:
+				
+				node.addEventListener('click', toggleTodo(todo.id));
+				
+				function toggleTodo (id) {
+					store.dispatch(toggleTodoAction(id));
+				}
+				
+				it results in a stack exceeded error, why? TODO
+			*/
+			
 			document.getElementById('todoBtn')
 				.addEventListener('click', addTodo);
 			
@@ -273,11 +285,22 @@
 			function addTodoToDOM (todo) {
 				const node = document.createElement('li');
 				const text = document.createTextNode(todo.name);
-				if(todo.complete) {
-					text.setAttribute('style','text-decoration:line-through;');
-				}
+				
 				node.appendChild(text);
-				node.setAttribute('id',todo.id);
+				
+				// You can't add attributes to text, it has to be an element
+				if(todo.complete) {
+					node.setAttribute('style','text-decoration:line-through;');
+				}
+				
+				/*
+					Simpler way to write it:
+					node.style.text-decoration = todo.complete ? 'line-through' : 'none';
+				*/
+				
+				node.addEventListener('click', () => {
+					store.dispatch(toggleTodoAction(todo.id))
+				});
 				
 				document.getElementById('todos')
 					.appendChild(node);
@@ -292,12 +315,12 @@
 					.appendChild(node);
 			}
 			
-			function toggleTodo (id) {
-				store.dispatch(toggleTodoAction(id));
-			}
-			
-			document.getElementsByTagName('li')
-				.addEventListener('click', toggleTodo(event.target.id));
+			/*
+				event.target doesn't work
+				
+				document.getElementsByTagName('li')
+					.addEventListener('click', toggleTodo(event.target.id));
+			*/
 		</script>
 	</body>
 </html>
