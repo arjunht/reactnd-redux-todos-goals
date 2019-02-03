@@ -16,6 +16,11 @@
 			<ul id='goals'></ul>
 		</div>
 		<script type='text/javascript'>
+			
+			function generateId () {
+				return Math.random().toString(36).substring(2) + (new Date()).getTime().toString(36);
+			}
+			
 			// Library Code
 			function createStore (reducer) {
 				// The store should have four parts
@@ -162,50 +167,88 @@
 
 			// Even though we have two reducer functions - todos and goals - but when we invoke createStore, we need to pass it only a single reducer - thats why we need to use a root reducer - app
 			const store = createStore(app);
-
-			const unsubscribe = store.subscribe(() => {
-				console.log('The new state is', store.getState());
-			});
-
-			unsubscribe(); // This doesn't seem to be working becuase of a listeners bug above, fixed
-
+			
 			store.subscribe(() => {
-				console.log('The new state after unsubscribe is ', store.getState());
-			});
+					console.log('The new state is', store.getState());
+				});
+				
+			/*
+				const unsubscribe = store.subscribe(() => {
+					console.log('The new state is', store.getState());
+				});
 
-			store.dispatch(addTodoAction({
-				id: 0,
-				name: 'Walk the dog',
-				complete: false,
-			}));
+				unsubscribe(); // This doesn't seem to be working becuase of a listeners bug above, fixed
 
-			store.dispatch(addTodoAction({
-				id: 1,
-				name: 'Wash the car',
-				complete: false,
-			}));
+				store.subscribe(() => {
+					console.log('The new state after unsubscribe is ', store.getState());
+				});
+			*/
+			
+			/*
+				store.dispatch(addTodoAction({
+					id: 0,
+					name: 'Walk the dog',
+					complete: false,
+				}));
 
-			store.dispatch(addTodoAction({
-				id: 2,
-				name: 'Go to the gym',
-				complete: true,
-			}))
+				store.dispatch(addTodoAction({
+					id: 1,
+					name: 'Wash the car',
+					complete: false,
+				}));
 
-			store.dispatch(removeTodoAction(1));
+				store.dispatch(addTodoAction({
+					id: 2,
+					name: 'Go to the gym',
+					complete: true,
+				}))
 
-			store.dispatch(toggleTodoAction(0));
+				store.dispatch(removeTodoAction(1));
 
-			store.dispatch(addGoalAction({
-				id: 0,
-				name: 'Learn Redux'
-			}));
+				store.dispatch(toggleTodoAction(0));
 
-			store.dispatch(addGoalAction({
-				id: 1,
-				name: 'Lose 20 pounds'
-			}))
+				store.dispatch(addGoalAction({
+					id: 0,
+					name: 'Learn Redux'
+				}));
 
-			store.dispatch(removeGoalAction(0));
+				store.dispatch(addGoalAction({
+					id: 1,
+					name: 'Lose 20 pounds'
+				}))
+
+				store.dispatch(removeGoalAction(0));
+			*/
+			
+			function addTodo () {
+				const input = document.getElementById('todo');
+				const name = input.value;
+				input.value = '';
+				
+				store.dispatch(addTodoAction({
+					id: generateId(),
+					name,
+					complete: false
+				}))
+			}
+			
+			function addGoal () {
+				const input = document.getElementById('goal');
+				const name = input.value;
+				input.value = '';
+				
+				store.dispatch(addGoalAction({
+					id: generateId(),
+					name
+				}))
+			}
+			
+			document.getElementById('todoBtn')
+				.addEventListener('click', addTodo);
+			
+			document.getElementById('goalBtn')
+				.addEventListener('click', addGoal);
+			
 		</script>
 	</body>
 </html>
