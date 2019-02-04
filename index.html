@@ -197,8 +197,8 @@
 				document.getElementById('todos').innerHTML = ''
 				document.getElementById('goals').innerHTML = ''
 				
-				todos.forEach(todo => addTodoToDOM(todo));
-				goals.forEach(goal => addGoalToDOM(goal));
+				todos.forEach(addTodoToDOM);
+				goals.forEach(addGoalToDOM);
 			});
 			
 			/*
