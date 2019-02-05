@@ -178,6 +178,19 @@
 				return next(action);
 			}
 			
+			const motivate = (store) => (next) => (action) => {
+				if(action.type === ADD_TODO) {
+					alert(`Don't forget to ${action.todo.name}!`);
+				}
+
+				if(action.type === ADD_GOAL) {
+					alert('That\'s a great goal!');
+					// alert("That's a great goal!"); - use " and then you don't have to use \
+				}
+
+				return next(action)
+			}
+			
 			const logger = (store) => (next) => (action) => {
 				console.group(action.type);
 					console.log('The action: ', action);
@@ -186,7 +199,7 @@
 						next is going ot be dispatch
 						it's as if we are dispacthing the action here, which will change the state
 					*/
-					const result =  next(action);
+					const result = next(action);
 					console.log('The new state: ', store.getState());
 				console.groupEnd();
 				return result;
@@ -227,10 +240,10 @@
 			const store = Redux.createStore(Redux.combineReducers({
 				todos,
 				goals
-			}), Redux.applyMiddleware(checker, logger));
+			}), Redux.applyMiddleware(checker, logger, motivate));
 			
 			/* 
-				Whenever we dispacth an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer
+				Whenever we dispacth an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer.
 			*/
 			
 			store.subscribe(() => {
