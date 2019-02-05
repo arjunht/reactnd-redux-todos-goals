@@ -164,7 +164,7 @@
 			}
 			*/
 			
-			function checkAndDispatch (store, action) {
+			const checker = (store) => (next) => (action) => {
 				if(action.type === ADD_TODO &&
 					action.todo.name.toLowerCase().includes('bitcoin')) {
 					return alert("Bad Todo");
@@ -175,9 +175,30 @@
 					return alert("Bad Goal");
 				}
 				
-				return store.dispatch(action);
+				return next(action)
 			}
 			
+			/* Below ES6
+			function checker(store) {
+				// next is going to next middleware in line if we have more than one middleware or its going to be dispatch
+				return function (next) {
+					return function (action) {
+						// We have access to store, next and action
+						if(action.type === ADD_TODO &&
+							action.todo.name.toLowerCase().includes('bitcoin')) {
+							return alert("Bad Todo");
+						}
+						
+						if(action.type === ADD_GOAL &&
+							action.goal.name.toLowerCase().includes('bitcoin')) {
+							return alert("Bad Goal");
+						}
+						
+						return next(action)
+					}
+				}
+			}
+			*/
 			/*
 				It doesn't make sense for a library have access to todos function because it could be different for different apps and todos might not be in the same scope
 				Therefore we need to pass in the reducer function
@@ -190,7 +211,7 @@
 			const store = Redux.createStore(Redux.combineReducers({
 				todos,
 				goals
-			}));
+			}), Redux.applyMiddleware(checker));
 			
 			store.subscribe(() => {
 				/*
@@ -234,7 +255,7 @@
 				const name = input.value;
 				input.value = '';
 				
-				checkAndDispatch(store, addTodoAction({
+				store.dispatch(addTodoAction({
 					id: generateId(),
 					name,
 					complete: false
@@ -246,7 +267,7 @@
 				const name = input.value;
 				input.value = '';
 				
-				checkAndDispatch(store, addGoalAction({
+				store.dispatch(addGoalAction({
 					id: generateId(),
 					name
 				}))
@@ -287,7 +308,7 @@
 				
 				node.appendChild(text);
 				node.appendChild(createRemoveButton(() => {
-					checkAndDispatch(store, removeTodoAction(todo.id))
+					store.dispatch(removeTodoAction(todo.id))
 				}));
 				
 				// You can't add attributes to text, it has to be an element
@@ -313,7 +334,7 @@
 				const text = document.createTextNode(goal.name);
 				node.appendChild(text);
 				node.appendChild(createRemoveButton(() => {
-					checkAndDispatch(store, removeGoalAction(goal.id))
+					store.dispatch(removeGoalAction(goal.id))
 				}));
 				
 				document.getElementById('goals')
