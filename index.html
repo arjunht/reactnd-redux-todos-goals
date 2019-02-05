@@ -175,7 +175,21 @@
 					return alert("Bad Goal");
 				}
 				
-				return next(action)
+				return next(action);
+			}
+			
+			const logger = (store) => (next) => (action) => {
+				console.group(action.type);
+					console.log('The action: ', action);
+					/*
+						We are invoking the next function passing it the the action.
+						next is going ot be dispatch
+						it's as if we are dispacthing the action here, which will change the state
+					*/
+					const result =  next(action);
+					console.log('The new state: ', store.getState());
+				console.groupEnd();
+				return result;
 			}
 			
 			/* Below ES6
@@ -199,6 +213,7 @@
 				}
 			}
 			*/
+			
 			/*
 				It doesn't make sense for a library have access to todos function because it could be different for different apps and todos might not be in the same scope
 				Therefore we need to pass in the reducer function
@@ -208,10 +223,15 @@
 			// Even though we have two reducer functions - todos and goals - but when we invoke createStore, we need to pass it only a single reducer - thats why we need to use a root reducer - app
 			
 			*/
+			
 			const store = Redux.createStore(Redux.combineReducers({
 				todos,
 				goals
-			}), Redux.applyMiddleware(checker));
+			}), Redux.applyMiddleware(checker, logger));
+			
+			/* 
+				Whenever we dispacth an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer
+			*/
 			
 			store.subscribe(() => {
 				/*
