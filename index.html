@@ -162,7 +162,22 @@
 					Whenever we want to add new state to our store, add a new property to this object and the value of that property is going to be a reducer function, which is going to be responsbile for managing that slice of our state.
 				
 			}
-
+			*/
+			
+			function checkAndDispatch (store, action) {
+				if(action.type === ADD_TODO &&
+					action.todo.name.toLowerCase().includes('bitcoin')) {
+					return alert("Bad Todo");
+				}
+				
+				if(action.type === ADD_GOAL &&
+					action.goal.name.toLowerCase().includes('bitcoin')) {
+					return alert("Bad Goal");
+				}
+				
+				return store.dispatch(action);
+			}
+			
 			/*
 				It doesn't make sense for a library have access to todos function because it could be different for different apps and todos might not be in the same scope
 				Therefore we need to pass in the reducer function
@@ -219,7 +234,7 @@
 				const name = input.value;
 				input.value = '';
 				
-				store.dispatch(addTodoAction({
+				checkAndDispatch(store, addTodoAction({
 					id: generateId(),
 					name,
 					complete: false
@@ -231,7 +246,7 @@
 				const name = input.value;
 				input.value = '';
 				
-				store.dispatch(addGoalAction({
+				checkAndDispatch(store, addGoalAction({
 					id: generateId(),
 					name
 				}))
@@ -272,7 +287,7 @@
 				
 				node.appendChild(text);
 				node.appendChild(createRemoveButton(() => {
-					store.dispatch(removeTodoAction(todo.id))
+					checkAndDispatch(store, removeTodoAction(todo.id))
 				}));
 				
 				// You can't add attributes to text, it has to be an element
@@ -298,7 +313,7 @@
 				const text = document.createTextNode(goal.name);
 				node.appendChild(text);
 				node.appendChild(createRemoveButton(() => {
-					store.dispatch(removeGoalAction(goal.id))
+					checkAndDispatch(store, removeGoalAction(goal.id))
 				}));
 				
 				document.getElementById('goals')
