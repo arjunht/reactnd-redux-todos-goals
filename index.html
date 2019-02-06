@@ -472,11 +472,24 @@
 			}
 			
 			class App extends React.Component {
+				
+				componentDidMount() {
+					/*
+						Every component instance has a forceUpdate mehtod on it
+						Its rarely used because typically it's an anti-pattern
+						When invoked, its going to cause a re-render of that specific component
+					*/
+					this.props.store.subscribe(() => this.forceUpdate());
+				}
+				
 				render() {
+					const { store } = this.props
+					const { todos, goals } = store.getState();
+					
 					return (
 						<div>
-							<Todos store={this.props.store} />
-							<Goals store={this.props.store} />
+							<Todos todos={todos} store={store} />
+							<Goals goals={goals} store={store} />
 						</div>
 					);
 				}
