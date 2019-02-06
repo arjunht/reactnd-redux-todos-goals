@@ -400,12 +400,42 @@
 				);
 			}
 			
+			/*
+				This is going to be an uncontrolled component meaning instead of sticking the value of the input field below on our component state, we will add a ref and then stick this ref on this component instance:
+				
+				ref={(input) => this.input = input}
+				
+				Whenever you use a ref, the input field will be passed in as the arg.
+				Assign this input field to the instance of the component (this)
+				
+				
+				So whenever we want to grab the value of the input field, we can just grab it from the instance.
+				
+			*/
+			
 			class Todos extends React.Component {
+				addItem = (e) => {
+					e.preventDefault();
+					const name = this.input.value;
+					this.input.value = ''
+					
+					this.props.store.dispatch(addTodoAction({
+						id: generateId(),
+						name,
+						complete: false
+					}))
+				}
+				
 				render() {
 					return (
 						<div>
-							Todos
-							
+							<h1>Todo List</h1>
+							<input
+								type='text'
+								placeholder='Add Todo'
+								ref={(input) => this.input = input}
+							/>
+							<button onClick={this.addItem} >Add Todo</button>
 							<List />
 						</div>
 					)
@@ -428,7 +458,7 @@
 				render() {
 					return (
 						<div>
-							<Todos />
+							<Todos store={this.props.store} />
 							<Goals />
 						</div>
 					);
@@ -436,7 +466,7 @@
 			}
 			
 			ReactDOM.render(
-				<App />,
+				<App store={store} />,
 				document.getElementById('app')
 			);
 		</script>
