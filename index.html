@@ -7,6 +7,7 @@
 		<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 	</head>
 	<body>
+		<!--
 		<div>
 			<h1>Todo List</h2>
 			<input id='todo' type='text' placeholder='Add Todo' />
@@ -21,6 +22,7 @@
 		</div>
 		
 		<hr />
+		-->
 		
 		<div id='app'></div>
 		
@@ -254,11 +256,13 @@
 				Whenever we dispacth an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer.
 			*/
 			
+			/* Commenting all the vanilla JS code
+			
 			store.subscribe(() => {
 				/*
 					Is there an other way of doing this by adding only the most recently added todo item
 					No, because the subscribe function doesn't have access to that
-				*/
+				
 				
 				const { todos, goals } = store.getState();
 				
@@ -269,7 +273,7 @@
 					Reason: DOM list isnt cleared, so we are adding the same todo to a todo already present
 					
 					Solution: Reset both the unordered list everytime the subsribe function is invoked
-				*/
+				
 				
 				document.getElementById('todos').innerHTML = ''
 				document.getElementById('goals').innerHTML = ''
@@ -288,7 +292,7 @@
 				store.subscribe(() => {
 					console.log('The new state after unsubscribe is ', store.getState());
 				});
-			*/
+			
 			
 			// DOM code
 			function addTodo () {
@@ -324,7 +328,7 @@
 				}
 				
 				it results in a stack exceeded error, why? TODO
-			*/
+			
 			
 			document.getElementById('todoBtn')
 				.addEventListener('click', addTodo);
@@ -360,7 +364,7 @@
 				/*
 					Simpler way to write it:
 					node.style.text-decoration = todo.complete ? 'line-through' : 'none';
-				*/
+				
 				
 				node.addEventListener('click', () => {
 					store.dispatch(toggleTodoAction(todo.id))
@@ -397,7 +401,9 @@
 					<ul>
 						{props.items.map((item) => (
 							<li key={item.id}>
-								<span>
+								<span
+									onClick={() => props.toggle && props.toggle(item.id)}
+									style={{textDecoration: item.complete ? 'line-through' : 'none'}}>
 									{item.name}
 								</span>
 								<button onClick={() => props.remove(item)}>
@@ -439,6 +445,10 @@
 					this.props.store.dispatch(removeTodoAction(todo.id))
 				}
 				
+				toggleItem = (id) => {
+					this.props.store.dispatch(toggleTodoAction(id))
+				}
+				
 				render() {
 					return (
 						<div>
@@ -452,6 +462,7 @@
 							<List
 								items={this.props.todos}
 								remove={this.removeItem}
+								toggle={this.toggleItem}
 							/>
 						</div>
 					)
