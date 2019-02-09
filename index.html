@@ -234,7 +234,7 @@
 					/*
 						We are invoking the next function passing it the the action.
 						next is going ot be dispatch
-						it's as if we are dispacthing the action here, which will change the state
+						it's as if we are dispatching the action here, which will change the state
 					*/
 					const result = next(action);
 					console.log('The new state: ', store.getState());
@@ -281,7 +281,7 @@
 			}), Redux.applyMiddleware(checker, logger, motivate));
 			
 			/* 
-				Whenever we dispacth an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer.
+				Whenever we dispatch an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer.
 			*/
 			
 			/* Commenting all the vanilla JS code
@@ -470,7 +470,22 @@
 				}
 				
 				removeItem = (todo) => {
-					this.props.store.dispatch(removeTodoAction(todo.id))
+					/* If we weren't using optimistic updates, would have been written as:
+						return API.deleteTodo(todo.id)
+							.then(() => {
+								this.props.store.dispatch(removeTodoAction(todo.id))
+							})
+					*/
+					
+					this.props.store.dispatch(removeTodoAction(todo.id));
+					
+					
+					return API.deleteTodo(todo.id)
+						.catch(() => {
+							// if thre is an error .catch will run
+							this.props.store.dispatch(addTodoAction(todo));
+							alert('An error occured. Try again.');
+						})
 				}
 				
 				toggleItem = (id) => {
@@ -511,6 +526,13 @@
 				
 				removeItem = (goal) => {
 					this.props.store.dispatch(removeGoalAction(goal.id))
+					
+					//Using optimistic updates:
+					return API.deleteGoal(goal.id)
+						.catch(() => {
+							this.props.store.dispatch(addGoalAction(goal));
+							alert('An error occcured. Try again.');
+						})
 				}
 				
 				render() {
@@ -576,6 +598,16 @@
 				render() {
 					const { store } = this.props
 					const { todos, goals, loading } = store.getState();
+					
+					/*
+					
+					This works for the inital case, but what happens if yu delete all the goals,
+					then you will be left with a loading screen
+					
+						if(todos === undefined || todos.length === 0 ||
+							goals === undefined || goals.length === 0) {
+						
+					*/
 					
 					if(loading === true) {
 						return <h3>Loading</h3>
