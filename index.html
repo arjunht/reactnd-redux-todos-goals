@@ -459,14 +459,39 @@
 			class Todos extends React.Component {
 				addItem = (e) => {
 					e.preventDefault();
+					
+					return API.saveTodo(this.input.value)
+						.then((todo) => {
+							this.props.store.dispatch(addTodoAction(todo))
+							this.input.value = ''
+						})
+						.catch(() => {
+							alert('There was an error adding the item. Try again');
+						})
+					
+					/*
+					
+					The only reason why we are not doing this is because the saveTodo gives us a todo item just based on the name and the id is generated for us.
+					
+					My soluton:
+					
 					const name = this.input.value;
 					this.input.value = ''
 					
-					this.props.store.dispatch(addTodoAction({
+					const todo = {
 						id: generateId(),
 						name,
 						complete: false
-					}))
+					}
+					
+					this.props.store.dispatch(addTodoAction(todo));
+					
+					return API.saveTodo(todo)
+						.catch(() => {
+							this.props.store.dispatch(removeTodoAction(todo.id));
+							alert('An error occured. Try again.');
+						})
+					*/
 				}
 				
 				removeItem = (todo) => {
@@ -479,7 +504,6 @@
 					
 					this.props.store.dispatch(removeTodoAction(todo.id));
 					
-					
 					return API.deleteTodo(todo.id)
 						.catch(() => {
 							// if thre is an error .catch will run
@@ -489,7 +513,13 @@
 				}
 				
 				toggleItem = (id) => {
-					this.props.store.dispatch(toggleTodoAction(id))
+					this.props.store.dispatch(toggleTodoAction(id));
+					
+					return API.saveTodoToggle(id)
+						.catch(() => {
+							this.props.store.dispatch(toggleTodoAction(id));
+							alert('An error occured. Try again.');
+						})
 				}
 				
 				render() {
@@ -515,13 +545,15 @@
 			class Goals extends React.Component {
 				addItem = (e) => {
 					e.preventDefault();
-					const name = this.input.value;
-					this.input.value = ''
 					
-					this.props.store.dispatch(addGoalAction({
-						id: generateId(),
-						name
-					}))
+					return API.saveGoal(this.input.value)
+						.then((goal) => {
+							this.props.store.dispatch(addGoalAction(goal));
+							this.input.value = '';
+						})
+						.catch(() => {
+							alert('There was an error adding the item. Try again.');
+						})
 				}
 				
 				removeItem = (goal) => {
