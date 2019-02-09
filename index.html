@@ -5,6 +5,7 @@
 		<script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
 		<script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
 		<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+		<script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
 	</head>
 	<body>
 		<!--
@@ -84,6 +85,7 @@
 			const TOGGLE_TODO = 'TOGGLE_TODO';
 			const ADD_GOAL = 'ADD_GOAL';
 			const REMOVE_GOAL = 'REMOVE_GOAL';
+			const RECEIVE_DATA = 'RECEIVE_DATA';
 
 			/*
 				Abstracting all of our different actions into their own functions called Action creators
@@ -123,6 +125,14 @@
 					id
 				}
 			}
+			
+			function receiveDataAction (todos, goals) {
+				return {
+					type: RECEIVE_DATA,
+					todos,
+					goals
+				}
+			}
 
 			function todos (state = [], action) {
 				switch (action.type) {
@@ -141,6 +151,9 @@
 							Object.assign allows us to create a new object and merge different properties onto that object 
 							So we create a new object {}, then merge all of the properties of the todo object, except for complete which is going to be exact opposite of what complete currently is
 						*/
+					case RECEIVE_DATA :
+						// Single action type affecting multiple parts of your store
+						return action.todos;
 					default :
 						return state;
 				}	
@@ -152,6 +165,9 @@
 						return state.concat([action.goal]);
 					case REMOVE_GOAL :
 						return state.filter((goal) => goal.id !== action.id);
+					case RECEIVE_DATA :
+						// Single action type affecting multiple parts of your store
+						return action.goals;
 					default :
 						return state;
 				}	
@@ -508,12 +524,41 @@
 			class App extends React.Component {
 				
 				componentDidMount() {
+					
+					const { store } = this.props;
+					
+					Promise.all([
+						API.fetchGoals(),
+						API.fetchTodos()
+					]).then(([goals, todos]) => {
+						/*
+							We need to tell our redux store about this data
+							We could loop over all of our goals and all of our actions
+							but then we would be dispatching a lot of actions
+							so a brand new action
+						*/
+						store.dispatch(receiveDataAction(todos, goals));
+						
+						//console.log('Goals:', goals);
+						//console.log('Todos:', todos);
+					});
+					
+					/* My solution:
+					API.fetchGoals()
+						.then((goals) => console.log('Goals:',goals));
+					
+					API.fetchTodos()
+						.then((todos) => console.log('Todos:', todos));
+					*/
+					
 					/*
 						Every component instance has a forceUpdate mehtod on it
 						Its rarely used because typically it's an anti-pattern
 						When invoked, its going to cause a re-render of that specific component
 					*/
-					this.props.store.subscribe(() => this.forceUpdate());
+					
+					store.subscribe(() => this.forceUpdate());
+					
 				}
 				
 				render() {
