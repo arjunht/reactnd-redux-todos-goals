@@ -135,6 +135,19 @@
 				}
 			}
 			
+			function handleSaveTodo (name, cb) {
+				return (dispatch) => {
+					return API.saveTodo(name)
+						.then((todo) => {
+							dispatch(addTodoAction(todo));
+							cb();
+						})
+						.catch(() => {
+							alert('There was an error adding the item. Try again');
+						})
+				}
+			}
+			
 			function handleDeleteTodo (todo) {
 			
 				// First we need a way to get access to dispatch: instead of returning an object, we just return a function and this function can be passed dispatch.
@@ -147,6 +160,44 @@
 							// if thre is an error .catch will run
 							dispatch(addTodoAction(todo));
 							alert('An error occured. Try again.');
+						})
+				}
+			}
+			
+			function handleSaveTodoToggle (id) {
+				return (dispatch) => {
+					dispatch(toggleTodoAction(id));
+					
+					return API.saveTodoToggle(id)
+						.catch(() => {
+							dispatch(toggleTodoAction(id));
+							alert('An error occured. Try again.');
+						})
+				}
+			}
+			
+			function handleSaveGoal (name, cb) {
+				return (dispatch) => {
+					return API.saveGoal(name)
+						.then((goal) => {
+							dispatch(addGoalAction(goal));
+							cb();
+						})
+						.catch(() => {
+							alert('There was an error adding the item. Try again.');
+						})
+				}
+			}
+			
+			function handleDeleteGoal (goal) {
+				return (dispatch) => {
+					
+					dispatch(removeGoalAction(goal.id))
+					
+					return API.deleteGoal(goal.id)
+						.catch(() => {
+							dispatch(addGoalAction(goal));
+							alert('An error occcured. Try again.');
 						})
 				}
 			}
@@ -488,6 +539,22 @@
 				addItem = (e) => {
 					e.preventDefault();
 					
+					/*
+						Second Argument: Callback function - why : 
+						Lets say they have the first argument defined as name in handleSaveTodo
+						Then you can try and setting that to empty, do you think that would work, no.
+						SO we use a callback which when executed, still has access to this.input.value
+						Closure?
+					*/
+					this.props.store.dispatch(handleSaveTodo(
+						this.input.value,
+						() => this.input.value = ''
+					));
+					
+					/*
+					
+					Before Thunk:
+					
 					return API.saveTodo(this.input.value)
 						.then((todo) => {
 							this.props.store.dispatch(addTodoAction(todo))
@@ -496,8 +563,6 @@
 						.catch(() => {
 							alert('There was an error adding the item. Try again');
 						})
-					
-					/*
 					
 					The only reason why we are not doing this is because the saveTodo gives us a todo item just based on the name and the id is generated for us.
 					
@@ -548,13 +613,7 @@
 				}
 				
 				toggleItem = (id) => {
-					this.props.store.dispatch(toggleTodoAction(id));
-					
-					return API.saveTodoToggle(id)
-						.catch(() => {
-							this.props.store.dispatch(toggleTodoAction(id));
-							alert('An error occured. Try again.');
-						})
+					this.props.store.dispatch(handleSaveTodoToggle(id));
 				}
 				
 				render() {
@@ -580,26 +639,14 @@
 			class Goals extends React.Component {
 				addItem = (e) => {
 					e.preventDefault();
-					
-					return API.saveGoal(this.input.value)
-						.then((goal) => {
-							this.props.store.dispatch(addGoalAction(goal));
-							this.input.value = '';
-						})
-						.catch(() => {
-							alert('There was an error adding the item. Try again.');
-						})
+					this.props.store.dispatch(handleSaveGoal(
+						this.input.value,
+						() => this.input.value = ''
+					));
 				}
 				
 				removeItem = (goal) => {
-					this.props.store.dispatch(removeGoalAction(goal.id))
-					
-					//Using optimistic updates:
-					return API.deleteGoal(goal.id)
-						.catch(() => {
-							this.props.store.dispatch(addGoalAction(goal));
-							alert('An error occcured. Try again.');
-						})
+					this.props.store.dispatch(handleDeleteGoal(goal))
 				}
 				
 				render() {
