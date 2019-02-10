@@ -574,6 +574,7 @@
 						SO we use a callback which when executed, still has access to this.input.value
 						Closure?
 					*/
+					
 					this.props.dispatch(handleSaveTodo(
 						this.input.value,
 						() => this.input.value = ''
@@ -664,6 +665,10 @@
 				}
 			}
 			
+			/*
+			
+			Using connect now
+			
 			class ConnectedTodos extends React.Component {
 				render() {
 					return (
@@ -676,6 +681,12 @@
 					);
 				}
 			}
+			
+			*/
+			
+			const ConnectedTodos = connect((state) => ({
+				todos: state.todos
+			}))(Todos);
 			
 			class Goals extends React.Component {
 				addItem = (e) => {
@@ -710,6 +721,10 @@
 				}
 			}
 			
+			/*
+			
+			Using Connect now
+			
 			class ConnectedGoals extends React.Component {
 				render() {
 					return (
@@ -723,13 +738,29 @@
 				}
 			}
 			
+			*/
+			
+			const ConnectedGoals = connect((state) => ({
+				goals: state.goals
+			}))(Goals);
+			
 			class App extends React.Component {
 				
 				componentDidMount() {
+				
+					/*
+						With Connect, whenever we connect a component, we also pass dispatch as a prop:
+						
+						const { store } = this.props;
+						
+						store.dispatch(handleInitialData());
 					
-					const { store } = this.props;
+					*/
 					
-					store.dispatch(handleInitialData());
+					const { dispatch } = this.props;
+					
+					dispatch(handleInitialData());
+					
 					
 					/*
 						Every component instance has a forceUpdate mehtod on it
@@ -737,13 +768,20 @@
 						When invoked, its going to cause a re-render of that specific component
 					*/
 					
-					store.subscribe(() => this.forceUpdate());
-					
+					/*
+						With connect, this will be covered
+						
+						store.subscribe(() => this.forceUpdate());
+					*/
 				}
 				
 				render() {
+					/*
+					Not needed since we are using connect
+					
 					const { store } = this.props
 					const { loading } = store.getState();
+					*/
 					
 					/*
 					
@@ -755,7 +793,7 @@
 						
 					*/
 					
-					if(loading === true) {
+					if(this.props.loading === true) {
 						return <h3>Loading</h3>
 					}
 					
@@ -768,6 +806,9 @@
 				}
 			}
 			
+			/*
+				ConnectedApp is rendering the Component and passing any data that the component needs from the store
+				
 			class ConnectedApp extends React.Component {
 				render() {
 					return (
@@ -779,8 +820,62 @@
 					);
 				}
 			}
+				
+				Why connect is needed: 
+					we have class Provider but nothing like that for Context.Consumer
+				
+				When we invoke connect, its going to return us anew functionw which we can then invoke with the second set of parenthesis
+				
+				Pass a function into the first set of parenthesis and this function is going to return us an object.
+				Store will be passed into the function and any properties that we return on this object will be passed as props to our App component
+				
+				Looking at our app component, the only prop that we need from store is loading
+			*/
+			
+			/*
+				Connect actually doesn't pass the store, its the state of the store
+				
+				const ConnectedApp = connect((store) => ({
+			*/
+			
+			const ConnectedApp = connect((state) => ({
+				loading: state.loading
+			}))(App);
 			
 			const Context = React.createContext();
+			
+			function connect(mapStateToProps) {
+				return(Component) => {
+					class Receiver extends React.Component {
+						componentDidMount() {
+							const { subscribe } = this.props.store;
+							this.unsubscribe = subscribe(() => this.forceUpdate())
+						}
+						componentWillUnmount() {
+							this.unsubscribe()
+						}
+						render() {
+							const { dispatch, getState } = this.props.store;
+							const state = getState();
+							const stateNeeded = mapStateToProps(state);
+							return <Component {...stateNeeded} dispatch={dispatch} />
+						}
+					}
+					
+					// Get store from Context:
+					class ConnectedComponent extends React.Component {
+						render() {
+							return (
+								<Context.Consumer>
+									{(store) => <Receiver store={store} />}
+								</Context.Consumer>
+							);
+						}
+					}
+					
+					return ConnectedComponent;
+				}
+			}
 			
 			// Make our own little abstraction over Provider by creating our own Provider component
 			class Provider extends React.Component {
