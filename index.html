@@ -574,7 +574,7 @@
 						SO we use a callback which when executed, still has access to this.input.value
 						Closure?
 					*/
-					this.props.store.dispatch(handleSaveTodo(
+					this.props.dispatch(handleSaveTodo(
 						this.input.value,
 						() => this.input.value = ''
 					));
@@ -623,7 +623,7 @@
 							})
 					*/
 					
-					this.props.store.dispatch(handleDeleteTodo(todo));
+					this.props.dispatch(handleDeleteTodo(todo));
 					
 					/*
 					
@@ -641,7 +641,7 @@
 				}
 				
 				toggleItem = (id) => {
-					this.props.store.dispatch(handleSaveTodoToggle(id));
+					this.props.dispatch(handleSaveTodoToggle(id));
 				}
 				
 				render() {
@@ -664,17 +664,30 @@
 				}
 			}
 			
+			class ConnectedTodos extends React.Component {
+				render() {
+					return (
+						<Context.Consumer>
+							{(store) => {
+								const { todos } = store.getState();
+								return <Todos todos={todos} dispatch={store.dispatch} />
+							}}
+						</Context.Consumer>
+					);
+				}
+			}
+			
 			class Goals extends React.Component {
 				addItem = (e) => {
 					e.preventDefault();
-					this.props.store.dispatch(handleSaveGoal(
+					this.props.dispatch(handleSaveGoal(
 						this.input.value,
 						() => this.input.value = ''
 					));
 				}
 				
 				removeItem = (goal) => {
-					this.props.store.dispatch(handleDeleteGoal(goal))
+					this.props.dispatch(handleDeleteGoal(goal))
 				}
 				
 				render() {
@@ -694,6 +707,19 @@
 							/>
 						</div>
 					)
+				}
+			}
+			
+			class ConnectedGoals extends React.Component {
+				render() {
+					return (
+						<Context.Consumer>
+							{(store) => {
+								const { goals } = store.getState();
+								return <Goals goals={goals} dispatch={store.dispatch} />
+							}}
+						</Context.Consumer>
+					);
 				}
 			}
 			
@@ -717,7 +743,7 @@
 				
 				render() {
 					const { store } = this.props
-					const { todos, goals, loading } = store.getState();
+					const { loading } = store.getState();
 					
 					/*
 					
@@ -735,15 +761,44 @@
 					
 					return (
 						<div>
-							<Todos todos={todos} store={store} />
-							<Goals goals={goals} store={store} />
+							<ConnectedTodos />
+							<ConnectedGoals />
 						</div>
 					);
 				}
 			}
 			
+			class ConnectedApp extends React.Component {
+				render() {
+					return (
+						<Context.Consumer>
+							{(store) => (
+								<App store={store} />
+							)}
+						</Context.Consumer>
+					);
+				}
+			}
+			
+			const Context = React.createContext();
+			
+			// Make our own little abstraction over Provider by creating our own Provider component
+			class Provider extends React.Component {
+				
+				// value passed to Context.Provider is what we want available on any Child Components that use Context.Consumer, i.e store
+				render () {
+					return (
+						<Context.Provider value={this.props.store}>
+							{this.props.children}
+						</Context.Provider>
+					)
+				}
+			}
+			
 			ReactDOM.render(
-				<App store={store} />,
+				<Provider store={store}>
+					<ConnectedApp />
+				</Provider>,
 				document.getElementById('app')
 			);
 		</script>
