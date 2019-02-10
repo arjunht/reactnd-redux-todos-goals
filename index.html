@@ -6,6 +6,7 @@
 		<script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
 		<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 		<script src="https://tylermcginnis.com/goals-todos-api/index.js"></script>
+		<script src="https://unpkg.com/redux-thunk@2.2.0/dist/redux-thunk.min.js"></script>
 	</head>
 	<body>
 		<!--
@@ -133,6 +134,22 @@
 					goals
 				}
 			}
+			
+			function handleDeleteTodo (todo) {
+			
+				// First we need a way to get access to dispatch: instead of returning an object, we just return a function and this function can be passed dispatch.
+				
+				return (dispatch) => {
+					dispatch(removeTodoAction(todo.id))
+					
+					return API.deleteTodo(todo.id)
+						.catch(() => {
+							// if thre is an error .catch will run
+							dispatch(addTodoAction(todo));
+							alert('An error occured. Try again.');
+						})
+				}
+			}
 
 			function todos (state = [], action) {
 				switch (action.type) {
@@ -242,6 +259,17 @@
 				return result;
 			}
 			
+			/*
+			Instead of this use ReduxThunk 
+			
+			const thunk = (store) => (next) => (action) => {
+				if(typeof action === 'function') {
+					return action(store.dispatch);
+				}
+				
+				return next(action);
+			}
+			
 			/* Below ES6
 			function checker(store) {
 				// next is going to next middleware in line if we have more than one middleware or its going to be dispatch
@@ -278,7 +306,7 @@
 				todos,
 				goals,
 				loading
-			}), Redux.applyMiddleware(checker, logger, motivate));
+			}), Redux.applyMiddleware(ReduxThunk.default, checker, logger, motivate));
 			
 			/* 
 				Whenever we dispatch an action, checker middleware will run before it ever hits the reducer. Then logger middleware will run and then it will hit the reducer.
@@ -498,9 +526,15 @@
 					/* If we weren't using optimistic updates, would have been written as:
 						return API.deleteTodo(todo.id)
 							.then(() => {
-								this.props.store.dispatch(removeTodoAction(todo.id))
+								this.props.store.dispatch(removeTodoAction(todo.id));
 							})
 					*/
+					
+					this.props.store.dispatch(handleDeleteTodo(todo));
+					
+					/*
+					
+					Separating the UI and the data fetching logic
 					
 					this.props.store.dispatch(removeTodoAction(todo.id));
 					
@@ -510,6 +544,7 @@
 							this.props.store.dispatch(addTodoAction(todo));
 							alert('An error occured. Try again.');
 						})
+					*/
 				}
 				
 				toggleItem = (id) => {
