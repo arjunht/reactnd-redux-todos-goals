@@ -201,6 +201,34 @@
 						})
 				}
 			}
+			
+			function handleInitialData () {
+				return (dispatch) => {
+					return Promise.all([
+						API.fetchGoals(),
+						API.fetchTodos()
+					]).then(([goals, todos]) => {
+						/*
+							We need to tell our redux store about this data
+							We could loop over all of our goals and all of our actions
+							but then we would be dispatching a lot of actions
+							so a brand new action
+						*/
+						dispatch(receiveDataAction(todos, goals));
+						
+						//console.log('Goals:', goals);
+						//console.log('Todos:', todos);
+					});
+					
+					/* My solution:
+					API.fetchGoals()
+						.then((goals) => console.log('Goals:',goals));
+					
+					API.fetchTodos()
+						.then((todos) => console.log('Todos:', todos));
+					*/
+				}
+			}
 
 			function todos (state = [], action) {
 				switch (action.type) {
@@ -675,29 +703,7 @@
 					
 					const { store } = this.props;
 					
-					Promise.all([
-						API.fetchGoals(),
-						API.fetchTodos()
-					]).then(([goals, todos]) => {
-						/*
-							We need to tell our redux store about this data
-							We could loop over all of our goals and all of our actions
-							but then we would be dispatching a lot of actions
-							so a brand new action
-						*/
-						store.dispatch(receiveDataAction(todos, goals));
-						
-						//console.log('Goals:', goals);
-						//console.log('Todos:', todos);
-					});
-					
-					/* My solution:
-					API.fetchGoals()
-						.then((goals) => console.log('Goals:',goals));
-					
-					API.fetchTodos()
-						.then((todos) => console.log('Todos:', todos));
-					*/
+					store.dispatch(handleInitialData());
 					
 					/*
 						Every component instance has a forceUpdate mehtod on it
